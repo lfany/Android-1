@@ -1,4 +1,4 @@
-﻿package com.imczy.googlehost.util;
+package com.imczy.googlehost.util;
 
 import android.content.Context;
 import android.os.AsyncTask;
