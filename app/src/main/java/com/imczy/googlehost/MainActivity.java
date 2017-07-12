@@ -24,226 +24,227 @@ import java.io.File;
 import java.io.FileWriter;
 
 public class MainActivity extends AppCompatActivity {
-	private static final String TAG = "MainActivity";
+    private static final String TAG = "MainActivity";
 
-	Button mProxyHostBtn, cleanHostBtn, readHostBtn;
-	TextView tipsView;
+    Button mProxyHostBtn, cleanHostBtn, readHostBtn;
+    TextView tipsView;
 
-	ProgressDialog mProgressDialog;
-	Handler mHandler = new Handler();
+    ProgressDialog mProgressDialog;
+    Handler mHandler = new Handler();
 
-	private boolean isMobileRoot = false;
+    private boolean isMobileRoot = false;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-		mProxyHostBtn = (Button) findViewById(R.id.proxy_btn);
-		cleanHostBtn = (Button) findViewById(R.id.clean_host);
-		readHostBtn = (Button) findViewById(R.id.read_host);
-		tipsView = (TextView) findViewById(R.id.tips);
+        mProxyHostBtn = (Button) findViewById(R.id.proxy_btn);
+        cleanHostBtn = (Button) findViewById(R.id.clean_host);
+        readHostBtn = (Button) findViewById(R.id.read_host);
+        tipsView = (TextView) findViewById(R.id.tips);
 
-		mProxyHostBtn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (!isMobileRoot) {
-					Toast.makeText(getContext(), R.string.get_root_fail, Toast.LENGTH_SHORT).show();
-					return;
-				}
+        mProxyHostBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isMobileRoot) {
+                    Toast.makeText(getContext(), R.string.get_root_fail, Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-				showProgressDialog();
-				DownloadUtil.downloadHostFile(MainActivity.this, new DownloadUtil.DownloadListener() {
-					@Override
-					public void success(final File file) {
-						Log.e(TAG, "success: Thread = " + Thread.currentThread());
-						// 需要host
-						AsyncTask.execute(new Runnable() {
-							@Override
-							public void run() {
-								try {
-									RootShell.getShell(true);
-								} catch (Exception e) {
-									mHandler.post(new Runnable() {
-										@Override
-										public void run() {
-											dismissDialog();
-										}
-									});
-									e.printStackTrace();
-								}
+                showProgressDialog();
+                DownloadUtil.downloadHostFile(MainActivity.this, new DownloadUtil.DownloadListener() {
+                    @Override
+                    public void success(final File file) {
+                        Log.e(TAG, "success: Thread = " + Thread.currentThread());
+                        // 需要host
+                        AsyncTask.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    RootShell.getShell(true);
+                                } catch (Exception e) {
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            dismissDialog();
+                                        }
+                                    });
+                                    e.printStackTrace();
+                                }
 
-								try {
-									RootTools.copyFile(file.getAbsolutePath(), "/system/etc/hosts", true, false);
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
-								mHandler.post(new Runnable() {
-									@Override
-									public void run() {
-										Toast.makeText(getContext(), R.string.get_last_host_tips, Toast.LENGTH_SHORT).show();
-										dismissDialog();
-									}
-								});
-							}
-						});
-					}
+                                try {
+                                    RootTools.copyFile(file.getAbsolutePath(), "/system/etc/hosts", true, false);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                mHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getContext(), R.string.get_last_host_tips, Toast.LENGTH_SHORT).show();
+                                        dismissDialog();
+                                    }
+                                });
+                            }
+                        });
+                    }
 
-					@Override
-					public void error() {
-						mHandler.post(new Runnable() {
-							@Override
-							public void run() {
-								Toast.makeText(getContext(), R.string.network_error, Toast.LENGTH_SHORT).show();
-								dismissDialog();
-							}
-						});
-					}
-				});
-			}
-		});
+                    @Override
+                    public void error() {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getContext(), R.string.network_error, Toast.LENGTH_SHORT).show();
+                                dismissDialog();
+                            }
+                        });
+                    }
+                });
+            }
+        });
 
-		cleanHostBtn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (!isMobileRoot) {
-					Toast.makeText(getContext(), R.string.get_root_fail, Toast.LENGTH_SHORT).show();
-					return;
-				}
+        cleanHostBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isMobileRoot) {
+                    Toast.makeText(getContext(), R.string.get_root_fail, Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-				AsyncTask.execute(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							RootShell.getShell(true);
-						} catch (Exception e) {
-							mHandler.post(new Runnable() {
-								@Override
-								public void run() {
-									dismissDialog();
-								}
-							});
-							e.printStackTrace();
-						}
-						RootTools.copyFile(getVoidHostPath(), "/system/etc/hosts", true, false);
-						mHandler.post(new Runnable() {
-							@Override
-							public void run() {
-								Toast.makeText(getContext(), R.string.huifu_host_tips, Toast.LENGTH_SHORT).show();
-							}
-						});
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            RootShell.getShell(true);
+                        } catch (Exception e) {
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    dismissDialog();
+                                }
+                            });
+                            e.printStackTrace();
+                        }
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getContext(),
+                                        RootTools.copyFile(getVoidHostPath(), "/system/etc/hosts", true, false) ?
+                                                R.string.huifu_host_tips : R.string.huifu_host_fail_tips, Toast.LENGTH_SHORT).show();
+                            }
+                        });
 
-					}
-				});
-			}
-		});
+                    }
+                });
+            }
+        });
 
-		readHostBtn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(getContext(), HostDetailActivity.class);
-				startActivity(intent);
-			}
-		});
+        readHostBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), HostDetailActivity.class);
+                startActivity(intent);
+            }
+        });
 
-		initVoidHost();
-		checkMobileIsRoot();
+        initVoidHost();
+        checkMobileIsRoot();
 
-	}
+    }
 
-	private void checkMobileIsRoot() {
-		AsyncTask.execute(new Runnable() {
-			@Override
-			public void run() {
-				isMobileRoot = RootShell.isRootAvailable();
-				if (!isMobileRoot) {
-					mHandler.post(new Runnable() {
-						@Override
-						public void run() {
-							tipsView.setText(getString(R.string.your_mobile_have_no_root));
-							mProxyHostBtn.setEnabled(false);
-							cleanHostBtn.setEnabled(false);
-						}
-					});
-				}
-			}
-		});
-	}
-
-
-	private void showProgressDialog() {
-		if (mProgressDialog == null) {
-			mProgressDialog = new ProgressDialog(getContext());
-		}
-		mProgressDialog.setTitle("");
-		mProgressDialog.setMessage(getString(R.string.loading));
-		mProgressDialog.show();
-	}
-
-	private void dismissDialog() {
-		if (mProgressDialog == null) {
-			return;
-		}
-		mProgressDialog.dismiss();
-	}
+    private void checkMobileIsRoot() {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                isMobileRoot = RootShell.isRootAvailable();
+                if (!isMobileRoot) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            tipsView.setText(getString(R.string.your_mobile_have_no_root));
+                            mProxyHostBtn.setEnabled(false);
+                            cleanHostBtn.setEnabled(false);
+                        }
+                    });
+                }
+            }
+        });
+    }
 
 
-	public String getRealFileDirPath() {
-		File dir = getFilesDir();
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
-		return dir.getAbsolutePath();
-	}
+    private void showProgressDialog() {
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(getContext());
+        }
+        mProgressDialog.setTitle("");
+        mProgressDialog.setMessage(getString(R.string.loading));
+        mProgressDialog.show();
+    }
 
-	private String getVoidHostPath() {
-		return getRealFileDirPath() + File.separator + Constants.VOID_HOST_NAME;
-	}
+    private void dismissDialog() {
+        if (mProgressDialog == null) {
+            return;
+        }
+        mProgressDialog.dismiss();
+    }
 
-	private Context getContext() {
-		return this;
-	}
 
-	private void initVoidHost() {
-		File voidHostFile = new File(getVoidHostPath());
-		if (voidHostFile.exists()) {
-			return;
-		}
-		AsyncTask.execute(new Runnable() {
-			@Override
-			public void run() {
-				File file = new File(getRealFileDirPath() + File.separator + Constants.VOID_HOST_NAME);
-				FileWriter fileWriter = null;
-				try {
-					fileWriter = new FileWriter(file);
-					fileWriter.write(Constants.VOID_HOST_VALUE);
-					fileWriter.flush();
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-					CloseUtil.close(fileWriter);
-				}
-			}
-		});
-	}
+    public String getRealFileDirPath() {
+        File dir = getFilesDir();
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        return dir.getAbsolutePath();
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.menu_main, menu);
-		return true;
-	}
+    private String getVoidHostPath() {
+        return getRealFileDirPath() + File.separator + Constants.VOID_HOST_NAME;
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		int id = item.getItemId();
+    private Context getContext() {
+        return this;
+    }
 
-		if (id == R.id.action_about) {
-			startActivity(new Intent(this, AboutActivity.class));
-			return true;
-		}
+    private void initVoidHost() {
+        File voidHostFile = new File(getVoidHostPath());
+        if (voidHostFile.exists()) {
+            return;
+        }
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                File file = new File(getRealFileDirPath() + File.separator + Constants.VOID_HOST_NAME);
+                FileWriter fileWriter = null;
+                try {
+                    fileWriter = new FileWriter(file);
+                    fileWriter.write(Constants.VOID_HOST_VALUE);
+                    fileWriter.flush();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    CloseUtil.close(fileWriter);
+                }
+            }
+        });
+    }
 
-		return super.onOptionsItemSelected(item);
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_about) {
+            startActivity(new Intent(this, AboutActivity.class));
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
 
 }

@@ -32,6 +32,7 @@
 
     <string name="your_mobile_have_no_root">您的手机没有root 将无法修改hsot文件, 请root 后再尝试</string>
     <string name="huifu_host_tips">恢复host成功</string>
+    <string name="huifu_host_fail_tips">恢复host失败</string>
     <string name="get_last_host_tips">获取host成功</string>
     <string name="loading">loading...</string>
 
